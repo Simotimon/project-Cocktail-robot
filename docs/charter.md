@@ -39,4 +39,4 @@ MuJoCo Menagerie의 UR5e 팔과 Robotiq 2F-85 그리퍼를 가져다 쓴다. 바
 - 매일 스크럼: 한 일 / 막힌 일 / 할 일
 - 의견이 갈리면 PM이 결정하고 이유를 회의록에 남긴다
 - 커밋 전 다른 사람 리뷰 1회
-- 연락: 팀 채널 [#채널명] / 저장소: github.com/Simotimon/project-Cocktail-robot
+- 연락: 팀 채널 [칵테일 바 로봇팔 팀] / 저장소: github.com/Simotimon/project-Cocktail-robot
