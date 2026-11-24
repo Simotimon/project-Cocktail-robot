@@ -1,0 +1,13 @@
+[project]
+name = "cocktail-bot"
+version = "0.1.0"
+description = "칵테일 바 로봇팔 MuJoCo 시뮬레이션"
+requires-python = ">=3.10"
+dependencies = ["mujoco>=3.2"]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
