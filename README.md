@@ -4,6 +4,8 @@
 
 - 팀 차터: [docs/charter.md](docs/charter.md)
 - 산출물 목록: [docs/register.md](docs/register.md)
+- 문제 정의서: [docs/problem.md](docs/problem.md)
+- 요구사항 명세: [docs/requirements.md](docs/requirements.md)
 
 ## 폴더
 

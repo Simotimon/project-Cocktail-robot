@@ -4,10 +4,10 @@
 
 | ID | 산출물 | 실무 명칭 | 스테이지 | 작성 | 검토 | 상태 | 버전 | 파일 |
 |---|---|---|---|---|---|---|---|---|
-| D01 | 문제 정의서 | Problem Statement | 01 | 개인 → PM | 팀 전원 | 작성 | v1 (제안서) | docs/problem.md (2일차) |
+| D01 | 문제 정의서 | Problem Statement | 01 | 개인 → PM | 팀 전원 | 검토 | v2 | docs/problem.md |
 | D02 | 팀 차터 | Project Charter | 01 | PM | 팀 전원 | 검토 | v1.0 | docs/charter.md |
-| D03 | 요구사항 명세 | PRD / SRS | 02 | PM | QA | – | – | – |
-| D04 | 요구사항 추적표 | Traceability Matrix | 02 | QA | PM | – | – | – |
+| D03 | 요구사항 명세 | PRD / SRS | 02 | PM | QA | 검토 | v0.1 | docs/requirements.md |
+| D04 | 요구사항 추적표 | Traceability Matrix | 02 | QA | PM | 검토 | v0.1 | docs/traceability.md |
 | D05 | 계획·WBS·위험 목록 | Project Plan / Risk Register | 02 | PM | 팀 전원 | – | – | – |
 | D06 | 시스템 구조 | System Architecture / ICD | 03 | 시뮬레이션 | 개발 | – | – | – |
 | D07 | 장면 구성표 | BOM 대응 | 03 | 시뮬레이션 | PM | – | – | – |
