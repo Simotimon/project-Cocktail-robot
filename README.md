@@ -1,6 +1,6 @@
 # 칵테일 바 로봇팔 (MuJoCo 시뮬레이션)
 
-작은 칵테일 바의 칵테일 제조를 로봇팔이 맡아, 매번 같은 양으로 만들 수 있음을 MuJoCo 시뮬레이션으로 입증하는 팀프로젝트.
+작은 칵테일 바를 무인으로 운영하도록 칵테일 제조를 로봇팔이 맡아, 매번 같은 양으로 만들 수 있음을 MuJoCo 시뮬레이션으로 입증하는 팀프로젝트.
 
 - 팀 차터: [docs/charter.md](docs/charter.md)
 - 산출물 목록: [docs/register.md](docs/register.md)
