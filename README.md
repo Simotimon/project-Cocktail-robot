@@ -6,6 +6,8 @@
 - 산출물 목록: [docs/register.md](docs/register.md)
 - 문제 정의서: [docs/problem.md](docs/problem.md)
 - 요구사항 명세: [docs/requirements.md](docs/requirements.md)
+- 장면 구성표: [docs/scene.md](docs/scene.md)
+- 시스템 구조·안전 개념: [docs/architecture.md](docs/architecture.md)
 
 ## 폴더
 
@@ -22,5 +24,5 @@
 ```
 git clone https://github.com/Simotimon/project-Cocktail-robot.git
 uv sync
-uv run python -m mujoco.viewer --mjcf=scenes/<장면>.xml   # 맥은 mjpython
+uv run python -m mujoco.viewer --mjcf=scenes/cocktail_bar.xml   # 맥은 mjpython
 ```

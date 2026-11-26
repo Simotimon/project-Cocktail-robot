@@ -1,0 +1,197 @@
+<!--
+  무인 칵테일 바 장면 v0 (D07 장면 구성표: docs/scene.md)
+  좌표: x = 레일 방향(손님이 볼 때 왼쪽 -, 오른쪽 +), y = 앞뒤(손님 쪽 -, 진열장 쪽 +), z = 위. 단위 m · kg.
+  MJCF 원기둥 size = "반지름 반높이", 상자 size = "가로 반 세로 반 높이 반".
+-->
+<mujoco model="cocktail_bar">
+  <compiler angle="radian" autolimits="true"/>
+  <option timestep="0.002" integrator="implicitfast" cone="elliptic" impratio="10"/>
+
+  <visual>
+    <global offwidth="1600" offheight="1000" azimuth="60" elevation="-25"/>
+    <headlight diffuse="0.5 0.5 0.5" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <quality shadowsize="4096"/>
+  </visual>
+
+  <asset>
+    <model name="ur5e" file="menagerie/universal_robots_ur5e/ur5e.xml"/>
+    <texture name="sky" type="skybox" builtin="gradient" rgb1="0.92 0.94 0.96" rgb2="0.75 0.8 0.85" width="512" height="512"/>
+    <texture name="floor" type="2d" builtin="checker" rgb1="0.62 0.62 0.6" rgb2="0.55 0.55 0.53" width="300" height="300"/>
+    <material name="floor" texture="floor" texrepeat="6 6" reflectance="0.05"/>
+    <material name="counter" rgba="0.55 0.42 0.3 1"/>
+    <material name="shelf" rgba="0.35 0.27 0.2 1"/>
+    <material name="metal" rgba="0.6 0.62 0.65 1" specular="0.6" shininess="0.6"/>
+    <material name="dark" rgba="0.15 0.15 0.16 1"/>
+    <material name="glass" rgba="0.75 0.88 0.95 0.45" specular="0.8"/>
+    <material name="door" rgba="0.55 0.75 0.95 0.25"/>
+    <material name="device" rgba="0.11 0.62 0.46 1"/>
+    <material name="marker" rgba="0.95 0.8 0.3 1"/>
+    <material name="customer_floor" rgba="0.36 0.79 0.65 0.25"/>
+    <material name="gin" rgba="0.62 0.88 0.8 0.85"/>
+    <material name="tonic" rgba="0.85 0.93 0.97 0.85"/>
+    <material name="whisky" rgba="0.73 0.46 0.09 0.9"/>
+    <material name="soda" rgba="0.9 0.95 0.98 0.85"/>
+    <material name="rum" rgba="0.6 0.24 0.11 0.9"/>
+    <material name="lime" rgba="0.59 0.77 0.35 0.9"/>
+    <material name="syrup" rgba="0.98 0.93 0.85 0.9"/>
+  </asset>
+
+  <default>
+    <default class="fixed">
+      <geom contype="1" conaffinity="1" friction="0.8 0.01 0.001"/>
+    </default>
+    <default class="visual_only">
+      <geom contype="0" conaffinity="0" group="1"/>
+    </default>
+    <!-- 병: 700ml 공병 하나로 통일. 몸통 지름 7cm · 높이 22cm, 목 지름 2.8cm · 높이 7cm, 가득 차면 1.2kg -->
+    <default class="bottle">
+      <geom friction="1.0 0.01 0.001" solref="0.004 1" condim="4"/>
+      <default class="bottle_body">
+        <geom type="cylinder" size="0.035 0.11" mass="1.1"/>
+      </default>
+      <default class="bottle_neck">
+        <geom type="cylinder" size="0.014 0.035" pos="0 0 0.145" mass="0.1"/>
+      </default>
+    </default>
+    <!-- 잔: 하이볼 잔 지름 7cm · 높이 13cm · 0.35kg (속이 찬 원기둥으로 단순화) -->
+    <default class="cup">
+      <geom type="cylinder" size="0.035 0.065" mass="0.35" material="glass" friction="1.0 0.01 0.001" condim="4"/>
+    </default>
+  </default>
+
+  <worldbody>
+    <light name="sun" pos="0.5 -0.8 3.2" dir="-0.15 0.25 -1" directional="true" diffuse="0.65 0.65 0.65" castshadow="true"/>
+    <light name="fill" pos="-1.5 -1.5 2.5" dir="0.5 0.5 -1" diffuse="0.25 0.25 0.25" castshadow="false"/>
+
+    <geom name="floor" type="plane" size="4 4 0.05" material="floor"/>
+    <geom name="customer_zone" class="visual_only" type="box" size="1.4 0.6 0.001" pos="0 -1.0 0.002" material="customer_floor"/>
+
+    <!-- 작업대: 2.4 x 0.8 m, 높이 0.9 m -->
+    <geom name="counter" class="fixed" type="box" size="1.2 0.4 0.45" pos="0 0 0.45" material="counter"/>
+
+    <!-- 리니어 레일 2.0 m (y = 0.15) -->
+    <geom name="rail" class="fixed" type="box" size="1.0 0.04 0.015" pos="0 0.15 0.915" material="metal"/>
+    <body name="rail_carriage" pos="0 0.15 0.93">
+      <joint name="rail" type="slide" axis="1 0 0" range="-0.8 0.8" damping="200" armature="5"/>
+      <geom name="carriage" type="box" size="0.1 0.08 0.01" pos="0 0 0.01" mass="5" material="dark" contype="0" conaffinity="0"/>
+      <body name="arm_mount" pos="0 0 0.02">
+        <attach model="ur5e" body="base" prefix="arm_"/>
+      </body>
+    </body>
+
+    <!-- 진열장: 한 단·한 줄. 선반 윗면 z = 0.95, 병 칸 y = 0.58 -->
+    <geom name="shelf_cabinet" class="fixed" type="box" size="1.0 0.15 0.475" pos="0 0.62 0.475" material="shelf"/>
+    <geom name="shelf_back" class="fixed" type="box" size="1.0 0.01 0.3" pos="0 0.765 1.25" material="shelf"/>
+    <geom name="shelf_lip" class="fixed" type="box" size="1.0 0.005 0.012" pos="0 0.475 0.962" material="shelf"/>
+    <geom name="slot_gin" class="visual_only" type="cylinder" size="0.04 0.001" pos="-0.75 0.58 0.951" material="marker"/>
+    <geom name="slot_tonic" class="visual_only" type="cylinder" size="0.04 0.001" pos="-0.6 0.58 0.951" material="marker"/>
+    <geom name="slot_whisky" class="visual_only" type="cylinder" size="0.04 0.001" pos="-0.4 0.58 0.951" material="marker"/>
+    <geom name="slot_soda" class="visual_only" type="cylinder" size="0.04 0.001" pos="-0.25 0.58 0.951" material="marker"/>
+    <geom name="slot_rum" class="visual_only" type="cylinder" size="0.04 0.001" pos="0.25 0.58 0.951" material="marker"/>
+    <geom name="slot_lime" class="visual_only" type="cylinder" size="0.04 0.001" pos="0.4 0.58 0.951" material="marker"/>
+    <geom name="slot_syrup" class="visual_only" type="cylinder" size="0.04 0.001" pos="0.55 0.58 0.951" material="marker"/>
+
+    <!-- 병 7개: 왼쪽 = 빌드(진토닉·하이볼), 가운데 비움(붓는 자리 뒤), 오른쪽 = 다이키리 -->
+    <body name="bottle_gin" pos="-0.75 0.58 1.06" childclass="bottle">
+      <freejoint/>
+      <geom class="bottle_body" material="gin"/>
+      <geom class="bottle_neck" material="gin"/>
+    </body>
+    <body name="bottle_tonic" pos="-0.6 0.58 1.06" childclass="bottle">
+      <freejoint/>
+      <geom class="bottle_body" material="tonic"/>
+      <geom class="bottle_neck" material="tonic"/>
+    </body>
+    <body name="bottle_whisky" pos="-0.4 0.58 1.06" childclass="bottle">
+      <freejoint/>
+      <geom class="bottle_body" material="whisky"/>
+      <geom class="bottle_neck" material="whisky"/>
+    </body>
+    <body name="bottle_soda" pos="-0.25 0.58 1.06" childclass="bottle">
+      <freejoint/>
+      <geom class="bottle_body" material="soda"/>
+      <geom class="bottle_neck" material="soda"/>
+    </body>
+    <body name="bottle_rum" pos="0.25 0.58 1.06" childclass="bottle">
+      <freejoint/>
+      <geom class="bottle_body" material="rum"/>
+      <geom class="bottle_neck" material="rum"/>
+    </body>
+    <body name="bottle_lime" pos="0.4 0.58 1.06" childclass="bottle">
+      <freejoint/>
+      <geom class="bottle_body" material="lime"/>
+      <geom class="bottle_neck" material="lime"/>
+    </body>
+    <body name="bottle_syrup" pos="0.55 0.58 1.06" childclass="bottle">
+      <freejoint/>
+      <geom class="bottle_body" material="syrup"/>
+      <geom class="bottle_neck" material="syrup"/>
+    </body>
+
+    <!-- 잔 거치대 + 잔 3개 (한 판 = 3잔) -->
+    <geom name="cup_rack" class="fixed" type="box" size="0.13 0.07 0.005" pos="-0.95 -0.12 0.905" material="metal"/>
+    <body name="cup_0" pos="-1.04 -0.12 0.976"><freejoint/><geom class="cup"/></body>
+    <body name="cup_1" pos="-0.95 -0.12 0.976"><freejoint/><geom class="cup"/></body>
+    <body name="cup_2" pos="-0.86 -0.12 0.976"><freejoint/><geom class="cup"/></body>
+
+    <!-- 붓는 자리 (레일 가운데 앞) -->
+    <geom name="pour_spot" class="visual_only" type="cylinder" size="0.06 0.001" pos="0 -0.1 0.901" material="marker"/>
+    <site name="pour_spot" pos="0 -0.1 0.9" size="0.01" rgba="1 0.8 0.2 1" group="4"/>
+
+    <!-- 셰이커(코블러): 통 + 뚜껑. 통 지름 8.6cm · 높이 17cm · 0.3kg, 뚜껑 0.15kg -->
+    <body name="shaker_tin" pos="0.53 -0.1 0.985">
+      <freejoint/>
+      <geom type="cylinder" size="0.043 0.085" mass="0.3" material="metal" friction="1.0 0.01 0.001" condim="4"/>
+    </body>
+    <body name="shaker_lid" pos="0.41 -0.1 0.931">
+      <freejoint/>
+      <geom type="cylinder" size="0.045 0.03" mass="0.12" material="metal" friction="1.0 0.01 0.001" condim="4"/>
+      <geom type="cylinder" size="0.016 0.015" pos="0 0 0.045" mass="0.03" material="dark"/>
+    </body>
+
+    <!-- 셰이킹 장치: 고정 받침 + 위아래로 흔드는 받침대(컵 모양) -->
+    <geom name="device_base" class="fixed" type="box" size="0.1 0.1 0.06" pos="0.75 -0.1 0.96" material="device"/>
+    <body name="shaker_device" pos="0.75 -0.1 1.025">
+      <joint name="shaker_device_z" type="slide" axis="0 0 1" range="-0.03 0.03" damping="50"/>
+      <geom type="box" size="0.06 0.06 0.005" mass="0.5" material="dark"/>
+      <geom type="box" size="0.06 0.005 0.04" pos="0 0.055 0.045" mass="0.1" material="dark"/>
+      <geom type="box" size="0.06 0.005 0.04" pos="0 -0.055 0.045" mass="0.1" material="dark"/>
+      <geom type="box" size="0.005 0.05 0.04" pos="0.055 0 0.045" mass="0.1" material="dark"/>
+      <geom type="box" size="0.005 0.05 0.04" pos="-0.055 0 0.045" mass="0.1" material="dark"/>
+    </body>
+
+    <!-- 픽업 칸 3개 (앞 탁자). 로봇 쪽은 열림, 손님 쪽 문은 닫힌 상태(인터락) -->
+    <geom name="pickup_wall_0" class="fixed" type="box" size="0.005 0.09 0.1" pos="-0.45 -0.31 1.0" material="metal"/>
+    <geom name="pickup_wall_1" class="fixed" type="box" size="0.005 0.09 0.1" pos="-0.15 -0.31 1.0" material="metal"/>
+    <geom name="pickup_wall_2" class="fixed" type="box" size="0.005 0.09 0.1" pos="0.15 -0.31 1.0" material="metal"/>
+    <geom name="pickup_wall_3" class="fixed" type="box" size="0.005 0.09 0.1" pos="0.45 -0.31 1.0" material="metal"/>
+    <geom name="pickup_roof" class="fixed" type="box" size="0.455 0.09 0.005" pos="0 -0.31 1.105" material="metal"/>
+    <geom name="pickup_door_customer" class="fixed" type="box" size="0.45 0.003 0.1" pos="0 -0.397 1.0" material="door"/>
+    <site name="pickup_0" pos="-0.3 -0.31 0.9" size="0.01" rgba="0.2 0.6 1 1" group="4"/>
+    <site name="pickup_1" pos="0 -0.31 0.9" size="0.01" rgba="0.2 0.6 1 1" group="4"/>
+    <site name="pickup_2" pos="0.3 -0.31 0.9" size="0.01" rgba="0.2 0.6 1 1" group="4"/>
+
+    <!-- 손님 쪽 태블릿(보기용, 시뮬레이션에서는 주문 데이터로 대신함) -->
+    <geom name="tablet_stand" class="visual_only" type="cylinder" size="0.015 0.5" pos="0.8 -0.95 0.5" material="dark"/>
+    <geom name="tablet" class="visual_only" type="box" size="0.14 0.01 0.1" pos="0.8 -0.95 1.05" euler="-0.6 0 0" material="dark"/>
+
+    <!-- 로봇 작업 영역(D08 안전 개념, R-06): 이 상자 밖으로 손끝이 나가면 정지 -->
+    <site name="work_zone" type="box" pos="0 0.195 1.35" size="1.2 0.575 0.45" rgba="0.2 0.8 0.4 0.06" group="4"/>
+
+    <!-- 센서 카메라 -->
+    <camera name="top_cam" pos="0 0.1 2.4" xyaxes="1 0 0 0 1 0" fovy="70"/>
+    <camera name="front_cam" pos="0 -1.8 1.6" xyaxes="1 0 0 0 0.316 0.949" fovy="55"/>
+  </worldbody>
+
+  <actuator>
+    <position name="rail" joint="rail" kp="4000" kv="400" ctrlrange="-0.8 0.8" forcerange="-500 500"/>
+    <position name="shaker_device" joint="shaker_device_z" kp="800" kv="20" ctrlrange="-0.03 0.03"/>
+  </actuator>
+
+  <!-- home: 레일 가운데, 그리퍼는 붓는 자리 위 27cm. qpos 순서 = 레일, 팔 6, 그리퍼 8, 병·잔·셰이커(자유 물체), 장치 -->
+  <keyframe>
+    <key name="home"
+      qpos="0 1.0051 -2.2929 2.3085 -1.5865 -1.5708 -0.5656 0 0 0 0 0 0 0 0 -0.75 0.58 1.06 1 0 0 0 -0.6 0.58 1.06 1 0 0 0 -0.4 0.58 1.06 1 0 0 0 -0.25 0.58 1.06 1 0 0 0 0.25 0.58 1.06 1 0 0 0 0.4 0.58 1.06 1 0 0 0 0.55 0.58 1.06 1 0 0 0 -1.04 -0.12 0.976 1 0 0 0 -0.95 -0.12 0.976 1 0 0 0 -0.86 -0.12 0.976 1 0 0 0 0.53 -0.1 0.985 1 0 0 0 0.41 -0.1 0.931 1 0 0 0 0"
+      ctrl="0 0 1.0051 -2.2929 2.3085 -1.5865 -1.5708 -0.5656 0"/>
+  </keyframe>
+</mujoco>
