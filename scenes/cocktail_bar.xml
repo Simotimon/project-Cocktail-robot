@@ -134,9 +134,12 @@
     <body name="cup_1" pos="-0.95 -0.12 0.976"><freejoint/><geom class="cup"/></body>
     <body name="cup_2" pos="-0.86 -0.12 0.976"><freejoint/><geom class="cup"/></body>
 
-    <!-- 붓는 자리 (레일 가운데 앞) -->
-    <geom name="pour_spot" class="visual_only" type="cylinder" size="0.06 0.001" pos="0 -0.1 0.901" material="marker"/>
-    <site name="pour_spot" pos="0 -0.1 0.9" size="0.01" rgba="1 0.8 0.2 1" group="4"/>
+    <!-- 붓는 자리 저울: 지름 12cm 받침판(윗면 z 0.912) + 무게 센서(touch, N). 잔을 올리고 부은 양을 무게로 잰다 -->
+    <body name="scale_pour" pos="0 -0.1 0.9">
+      <geom name="scale_pour_plate" class="fixed" type="cylinder" size="0.06 0.006" pos="0 0 0.006" material="marker"/>
+      <site name="scale_pour_area" type="cylinder" size="0.06 0.012" pos="0 0 0.012" rgba="1 0.8 0.2 0.2" group="4"/>
+      <site name="pour_spot" pos="0 0 0.012" size="0.01" rgba="1 0.8 0.2 1" group="4"/>
+    </body>
 
     <!-- 셰이커(코블러): 통 + 뚜껑. 통 지름 8.6cm · 높이 17cm · 0.3kg, 뚜껑 0.15kg -->
     <body name="shaker_tin" pos="0.53 -0.1 0.985">
@@ -167,9 +170,22 @@
     <geom name="pickup_wall_3" class="fixed" type="box" size="0.005 0.09 0.1" pos="0.45 -0.31 1.0" material="metal"/>
     <geom name="pickup_roof" class="fixed" type="box" size="0.455 0.09 0.005" pos="0 -0.31 1.105" material="metal"/>
     <geom name="pickup_door_customer" class="fixed" type="box" size="0.45 0.003 0.1" pos="0 -0.397 1.0" material="door"/>
-    <site name="pickup_0" pos="-0.3 -0.31 0.9" size="0.01" rgba="0.2 0.6 1 1" group="4"/>
-    <site name="pickup_1" pos="0 -0.31 0.9" size="0.01" rgba="0.2 0.6 1 1" group="4"/>
-    <site name="pickup_2" pos="0.3 -0.31 0.9" size="0.01" rgba="0.2 0.6 1 1" group="4"/>
+    <!-- 픽업 칸 저울 3개: 잔이 놓였는지, 손님이 가져갔는지 무게로 안다 -->
+    <body name="scale_pickup_0" pos="-0.3 -0.31 0.9">
+      <geom name="scale_pickup_0_plate" class="fixed" type="box" size="0.12 0.07 0.006" pos="0 0 0.006" material="metal"/>
+      <site name="scale_pickup_0_area" type="box" size="0.12 0.07 0.012" pos="0 0 0.012" rgba="0.2 0.6 1 0.2" group="4"/>
+      <site name="pickup_0" pos="0 0 0.012" size="0.01" rgba="0.2 0.6 1 1" group="4"/>
+    </body>
+    <body name="scale_pickup_1" pos="0 -0.31 0.9">
+      <geom name="scale_pickup_1_plate" class="fixed" type="box" size="0.12 0.07 0.006" pos="0 0 0.006" material="metal"/>
+      <site name="scale_pickup_1_area" type="box" size="0.12 0.07 0.012" pos="0 0 0.012" rgba="0.2 0.6 1 0.2" group="4"/>
+      <site name="pickup_1" pos="0 0 0.012" size="0.01" rgba="0.2 0.6 1 1" group="4"/>
+    </body>
+    <body name="scale_pickup_2" pos="0.3 -0.31 0.9">
+      <geom name="scale_pickup_2_plate" class="fixed" type="box" size="0.12 0.07 0.006" pos="0 0 0.006" material="metal"/>
+      <site name="scale_pickup_2_area" type="box" size="0.12 0.07 0.012" pos="0 0 0.012" rgba="0.2 0.6 1 0.2" group="4"/>
+      <site name="pickup_2" pos="0 0 0.012" size="0.01" rgba="0.2 0.6 1 1" group="4"/>
+    </body>
 
     <!-- 손님 쪽 태블릿(보기용, 시뮬레이션에서는 주문 데이터로 대신함) -->
     <geom name="tablet_stand" class="visual_only" type="cylinder" size="0.015 0.5" pos="0.8 -0.95 0.5" material="dark"/>
@@ -188,7 +204,15 @@
     <position name="shaker_device" joint="shaker_device_z" kp="800" kv="20" ctrlrange="-0.03 0.03"/>
   </actuator>
 
-  <!-- home: 레일 가운데, 그리퍼는 붓는 자리 위 27cm. qpos 순서 = 레일, 팔 6, 그리퍼 8, 병·잔·셰이커(자유 물체), 장치 -->
+  <!-- 무게 센서: 받침판 위 접촉의 수직 힘 합(N). 무게(g) = N ÷ 9.81 × 1000 -->
+  <sensor>
+    <touch name="scale_pour" site="scale_pour_area"/>
+    <touch name="scale_pickup_0" site="scale_pickup_0_area"/>
+    <touch name="scale_pickup_1" site="scale_pickup_1_area"/>
+    <touch name="scale_pickup_2" site="scale_pickup_2_area"/>
+  </sensor>
+
+  <!-- home: 레일 가운데, 그리퍼는 붓는 자리 저울 위 약 26cm. qpos 순서 = 레일, 팔 6, 그리퍼 8, 병·잔·셰이커(자유 물체), 장치 -->
   <keyframe>
     <key name="home"
       qpos="0 1.0051 -2.2929 2.3085 -1.5865 -1.5708 -0.5656 0 0 0 0 0 0 0 0 -0.75 0.58 1.06 1 0 0 0 -0.6 0.58 1.06 1 0 0 0 -0.4 0.58 1.06 1 0 0 0 -0.25 0.58 1.06 1 0 0 0 0.25 0.58 1.06 1 0 0 0 0.4 0.58 1.06 1 0 0 0 0.55 0.58 1.06 1 0 0 0 -1.04 -0.12 0.976 1 0 0 0 -0.95 -0.12 0.976 1 0 0 0 -0.86 -0.12 0.976 1 0 0 0 0.53 -0.1 0.985 1 0 0 0 0.41 -0.1 0.931 1 0 0 0 0"

@@ -37,6 +37,31 @@ def test_actuators_and_cameras(model):
     assert len([a for a in actuators if a.startswith("arm_")]) == 7  # 팔 6 + 그리퍼 1
     cameras = {model.camera(i).name for i in range(model.ncam)}
     assert {"top_cam", "front_cam"} <= cameras
+    sensors = {model.sensor(i).name for i in range(model.nsensor)}
+    assert sensors == {"scale_pour", "scale_pickup_0", "scale_pickup_1", "scale_pickup_2"}
+
+
+def test_scales_read_cup_and_liquid_weight(model):
+    # 저울: 빈 저울 0, 잔 하나 350g, 잔 질량을 늘리면(액체 흉내) 그만큼 더 읽는다
+    data = mujoco.MjData(model)
+    mujoco.mj_resetDataKeyframe(model, data, model.key("home").id)
+    grams = lambda name: data.sensor(name).data[0] / 9.81 * 1000
+    cup = model.body("cup_1")
+    adr = model.joint(cup.jntadr[0]).qposadr[0]
+    top = model.body("scale_pour").pos[2] + 0.012  # 저울 윗면 z
+    data.qpos[adr:adr + 7] = [0, -0.1, top + 0.066, 1, 0, 0, 0]
+    for _ in range(500):
+        mujoco.mj_step(model, data)
+    assert abs(grams("scale_pour") - 350) < 2
+    assert all(grams(f"scale_pickup_{i}") == 0 for i in range(3))
+    original = model.body_mass[cup.id]
+    try:
+        model.body_mass[cup.id] += 0.045 * 0.94  # 위스키 45ml
+        for _ in range(500):
+            mujoco.mj_step(model, data)
+        assert abs(grams("scale_pour") - (350 + 45 * 0.94)) < 2
+    finally:
+        model.body_mass[cup.id] = original
 
 
 def test_scene_is_stable_from_home(model):

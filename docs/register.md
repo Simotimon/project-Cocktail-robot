@@ -9,8 +9,8 @@
 | D03 | 요구사항 명세 | PRD / SRS | 02 | PM | QA | 검토 | v0.3 | docs/requirements.md |
 | D04 | 요구사항 추적표 | Traceability Matrix | 02 | QA | PM | 검토 | v0.2 | docs/traceability.md |
 | D05 | 계획·WBS·위험 목록 | Project Plan / Risk Register | 02 | PM | 팀 전원 | – | – | – |
-| D06 | 시스템 구조 | System Architecture / ICD | 03 | 시뮬레이션 | 개발 | 작성 | v0.1 | docs/architecture.md |
-| D07 | 장면 구성표 | BOM 대응 | 03 | 시뮬레이션 | PM | 작성 | v0.1 | docs/scene.md, scenes/cocktail_bar.xml |
-| D08 | 안전 개념 | Safety Concept | 03 | 시뮬레이션 | QA | 작성 | v0.1 | docs/architecture.md |
+| D06 | 시스템 구조 | System Architecture / ICD | 03 | 시뮬레이션 | 개발 | 작성 | v0.2 | docs/architecture.md |
+| D07 | 장면 구성표 | BOM 대응 | 03 | 시뮬레이션 | PM | 작성 | v0.2 | docs/scene.md, scenes/cocktail_bar.xml |
+| D08 | 안전 개념 | Safety Concept | 03 | 시뮬레이션 | QA | 작성 | v0.2 | docs/architecture.md |
 
 상태: 작성 → 검토 → 승인. 팀 검토가 끝나면 상태를 '승인'으로 바꾼다.
